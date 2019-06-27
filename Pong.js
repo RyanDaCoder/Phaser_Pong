@@ -78,6 +78,8 @@ class playGame extends Phaser.Scene{
             this.paddle2.setVelocityX(0);
         }
 
+        
+
     }
 }
 
