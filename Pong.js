@@ -5,6 +5,11 @@ var arrowLeft;
 var arrowRight;
 var zone1;
 var zone2;
+var vel = 0;
+var score1 = 0;
+var score2 = 0;
+var text1;
+var text2;
 
 window.onload = function() {
 
@@ -20,7 +25,7 @@ window.onload = function() {
             default: "arcade",
             arcade: {
 
-                debug: true
+                debug: false
             }
             
         }
@@ -33,6 +38,7 @@ window.onload = function() {
 
 }
 
+const newLocal = 500;
 class playGame extends Phaser.Scene{
     constructor(){
         super("PlayGame");
@@ -44,9 +50,11 @@ class playGame extends Phaser.Scene{
         this.load.image("background", "background.jpg");
         this.load.image("blank1", "Blank.png");
         this.load.image("blank2", "Blank.png");
-        this.load.image("circle1", "circle.png");
-        this.load.image("circle2", "circle.png");
-        this.load.image("square", "triangle.png");
+        this.load.image("blank3", "Blank.png");
+        this.load.image("rocket", "rocket.png");
+        // this.load.image("circle1", "circle.png");
+        // this.load.image("circle2", "circle.png");
+        // this.load.image("square", "triangle.png");
     }
     
     create() {
@@ -55,6 +63,11 @@ class playGame extends Phaser.Scene{
         this.background = this.physics.add.image(0,0, 'background');
         this.background.setScale(1.5,2.1);
 
+        text1 = this.add.text(15,15, 'Score: ' + score1, {fontFamily: 'ChineseDragon', fontSize: 50, color: '#00ff00'});
+        text2 = this.add.text(15,950, 'Score: ' + score2, {fontFamily: 'ChineseDragon', fontSize: 50, color: '#00ff00'})
+
+        
+
         //this.physics.world.setFPS(144);
         this.physics.world.setBoundsCollision(true, true, false, false);
     //ball
@@ -62,17 +75,14 @@ class playGame extends Phaser.Scene{
         this.ball.setData('onPaddle', true);
         this.ball.setVelocityX(500);
         this.ball.setVelocityY(250);
-        this.ball.setCircle(32);
         this.ball.setBounce(1);
-    //circles
-        // this.circle1 = this.physics.add.image(0,500, 'circle1');
-        // this.circle1.setImmovable(true);
-        // //this.circle1.setCircle(200);
-        // this.circle1.setBounce(1);
-        // this.circle2 = this.physics.add.image(1000,500, 'circle1');
-        // this.circle2.setImmovable(true);
-        // //this.circle2.setCircle(200);
-        // this.circle2.setBounce(1);
+    //missiles
+        this.rocket = this.physics.add.image(-10, 500, 'rocket');
+        
+        //this.rocket.setCollideWorldBounds(true);
+        this.rocket.setScale(.25);
+        this.rocket.setBounce(1);
+        this.rocket.setImmovable(true);
     //blanks
         this.blank1 = this.physics.add.image(500,0, 'blank1');
         this.blank1.setScale(1.3,0.01);
@@ -81,6 +91,10 @@ class playGame extends Phaser.Scene{
         this.blank2 = this.physics.add.image(500,1000, 'blank2');
         this.blank2.setScale(1.3,0.01);
         this.blank2.setImmovable(true);
+
+        this.blank3 = this.physics.add.image(1400,500, 'blank3');
+        this.blank3.setImmovable(true);
+
 /*
     //triangle 
          this.triangle = this.physics.add.image(100,500).setDepth(5);
@@ -113,12 +127,15 @@ class playGame extends Phaser.Scene{
         //zone2.body.debugBodyColor = 0xff3a00;
         this.physics.add.collider(this.ball, this.blank2,this.blankF,null,this);
         this.physics.add.collider(this.ball, this.blank1,this.blankF1,null,this);
+        //this.physics.add.collider(this.ball, this.rocket,null,null,this);
+        this.physics.add.collider(this.ball, this.rocket,this.missleHit,null,this);
     }
     
     update() {
         //paddle movement
         this.paddle1.setVelocityX(0);
         this.paddle2.setVelocityX(0);
+        this.rocket.setVelocityX(700);
 
         if (keyA.isDown){
             this.paddle1.setVelocityX(-500);
@@ -161,20 +178,41 @@ class playGame extends Phaser.Scene{
         if (this.paddle2.x > 875){
             this.paddle2.x = 875;
         }
-        
-    }
 
-    blankF (ball, blank1) {
-        ball.x = 500;
-        ball.y = 500;
-        console.log("touching1")
+        if (this.rocket.x > 1050) {
+            this.rocket.x *= -1;
+        }
+        vel = this.ball.body.velocity.x;
     }
 
     blankF1 (ball, blank2) {
         ball.x = 500;
         ball.y = 500;
+        ball.setVelocityX(500);
+        ball.setVelocityY(250);
+        score2++;
+        text2.setText ( "Score: " + score2);
         console.log("touching2")
     }
+
+    blankF (ball, blank1) {
+        ball.x = 500;
+        ball.y = 500;
+        ball.setVelocityX(500);
+        ball.setVelocityY(-250);
+        score1++;
+        text1.setText( "Score: " + score1);
+        console.log("touching1")
+    }
+
+    missleHit (rocket, ball) {
+        this.rocket.x = -1050;
+        this.ball.setVelocityX(this.ball.body.velocity.x*1);
+        
+    }
+
+    
+    
 }
 
 
